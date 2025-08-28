@@ -1,0 +1,249 @@
+➜  Database Course git:(main) ✗ psql -h localhost -p 5432 -U postgres -d postgres
+Password for user postgres: 
+psql (14.18 (Ubuntu 14.18-0ubuntu0.22.04.1))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+postgres=# \l
+                                    List of databases
+     Name      |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges   
+---------------+----------+----------+-------------+-------------+-----------------------
+ database_name | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ postgres      | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ template0     | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+               |          |          |             |             | postgres=CTc/postgres
+ template1     | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+               |          |          |             |             | postgres=CTc/postgres
+ university    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+(5 rows)
+
+postgres=# \d
+                   List of relations
+ Schema |          Name           |   Type   |  Owner   
+--------+-------------------------+----------+----------
+ public | students_student_id_seq | sequence | postgres
+ public | university_students     | table    | postgres
+(2 rows)
+
+postgres=# -- Define primary key at column level
+CREATE TABLE students (
+    student_id INTEGER PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(150)
+);
+CREATE TABLE
+postgres=# \d
+                   List of relations
+ Schema |          Name           |   Type   |  Owner   
+--------+-------------------------+----------+----------
+ public | students                | table    | postgres
+ public | students_student_id_seq | sequence | postgres
+ public | university_students     | table    | postgres
+(3 rows)
+
+postgres=# DROP TABLE students;
+DROP TABLE
+postgres=# -- Define primary key at table level
+CREATE TABLE students (
+    student_id INTEGER,
+    name VARCHAR(100),
+    email VARCHAR(150),
+    PRIMARY KEY (student_id)
+);
+CREATE TABLE
+postgres=# \d
+                   List of relations
+ Schema |          Name           |   Type   |  Owner   
+--------+-------------------------+----------+----------
+ public | students                | table    | postgres
+ public | students_student_id_seq | sequence | postgres
+ public | university_students     | table    | postgres
+(3 rows)
+
+postgres=# DROP TABLE students;
+DROP TABLE
+postgres=# -- Define primary key with a custom name
+CREATE TABLE students (
+    student_id INTEGER,
+    name VARCHAR(100),
+    email VARCHAR(150),
+    CONSTRAINT pk_students PRIMARY KEY (student_id)
+);
+CREATE TABLE
+postgres=# DROP TABLE students;
+DROP TABLE
+postgres=# CREATE TABLE students (
+    student_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE,
+    faculty VARCHAR(50)
+);
+CREATE TABLE
+postgres=# -- Insert sample data
+INSERT INTO students (name, email, faculty) VALUES
+('Alice Johnson', 'alice@alatoo.edu.kg', 'Computer Science'),
+('Bob Smith', 'bob@alatoo.edu.kg', 'Mathematics'),
+('Carol Davis', 'carol@alatoo.edu.kg', 'Computer Science');
+INSERT 0 3
+postgres=# SELECT * FROM students;
+ student_id |     name      |        email        |     faculty      
+------------+---------------+---------------------+------------------
+          1 | Alice Johnson | alice@alatoo.edu.kg | Computer Science
+          2 | Bob Smith     | bob@alatoo.edu.kg   | Mathematics
+          3 | Carol Davis   | carol@alatoo.edu.kg | Computer Science
+(3 rows)
+
+postgres=# CREATE TABLE course_enrollments (
+    student_id INTEGER,
+    course_id INTEGER,
+    semester VARCHAR(20),
+    enrollment_date DATE DEFAULT CURRENT_DATE,
+    grade CHAR(2),
+    PRIMARY KEY (student_id, course_id, semester)
+);
+CREATE TABLE
+postgres=# -- Insert sample data
+INSERT INTO course_enrollments (student_id, course_id, semester, grade) VALUES
+(1, 101, '2024-Spring', 'A'),
+(1, 102, '2024-Spring', 'B+'),
+(2, 101, '2024-Spring', 'A-'),
+(1, 101, '2024-Fall', 'A+');  -- Same student can take same course in different semester
+INSERT 0 4
+postgres=# SELECT FROM * course_enrollments;
+ERROR:  syntax error at or near "*"
+LINE 1: SELECT FROM * course_enrollments;
+                    ^
+postgres=# SELECT * FROM course_enrollments;
+ student_id | course_id |  semester   | enrollment_date | grade 
+------------+-----------+-------------+-----------------+-------
+          1 |       101 | 2024-Spring | 2025-08-28      | A 
+          1 |       102 | 2024-Spring | 2025-08-28      | B+
+          2 |       101 | 2024-Spring | 2025-08-28      | A-
+          1 |       101 | 2024-Fall   | 2025-08-28      | A+
+(4 rows)
+
+postgres=# CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    product_name VARCHAR(100) NOT NULL,
+    price DECIMAL(10,2)
+);
+
+-- SERIAL is equivalent to:
+-- product_id INTEGER NOT NULL DEFAULT nextval('products_product_id_seq'),
+-- where products_product_id_seq is an automatically created sequence
+CREATE TABLE
+postgres=# \d
+                    List of relations
+ Schema |           Name           |   Type   |  Owner   
+--------+--------------------------+----------+----------
+ public | course_enrollments       | table    | postgres
+ public | products                 | table    | postgres
+ public | products_product_id_seq  | sequence | postgres
+ public | students                 | table    | postgres
+ public | students_student_id_seq  | sequence | postgres
+ public | students_student_id_seq1 | sequence | postgres
+ public | university_students      | table    | postgres
+(7 rows)
+
+postgres=# CREATE TABLE transactions (
+    transaction_id BIGSERIAL PRIMARY KEY,  -- Can handle very large numbers
+    amount DECIMAL(15,2),
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE
+postgres=# \d
+                       List of relations
+ Schema |              Name               |   Type   |  Owner   
+--------+---------------------------------+----------+----------
+ public | course_enrollments              | table    | postgres
+ public | products                        | table    | postgres
+ public | products_product_id_seq         | sequence | postgres
+ public | students                        | table    | postgres
+ public | students_student_id_seq         | sequence | postgres
+ public | students_student_id_seq1        | sequence | postgres
+ public | transactions                    | table    | postgres
+ public | transactions_transaction_id_seq | sequence | postgres
+ public | university_students             | table    | postgres
+(9 rows)
+
+postgres=# -- IDENTITY ALWAYS - PostgreSQL controls the value completely
+CREATE TABLE orders (
+    order_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    customer_name VARCHAR(100),
+    order_date DATE DEFAULT CURRENT_DATE
+);
+
+-- IDENTITY BY DEFAULT - Allows manual insertion but auto-generates if not provided
+CREATE TABLE customers (
+    customer_id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    customer_name VARCHAR(100),
+    email VARCHAR(150)
+);
+
+-- You can still insert specific values with BY DEFAULT
+INSERT INTO customers (customer_id, customer_name, email) 
+VALUES (1000, 'VIP Customer', 'vip@example.com');
+CREATE TABLE
+CREATE TABLE
+INSERT 0 1
+postgres=# \d
+                       List of relations
+ Schema |              Name               |   Type   |  Owner   
+--------+---------------------------------+----------+----------
+ public | course_enrollments              | table    | postgres
+ public | customers                       | table    | postgres
+ public | customers_customer_id_seq       | sequence | postgres
+ public | orders                          | table    | postgres
+ public | orders_order_id_seq             | sequence | postgres
+ public | products                        | table    | postgres
+ public | products_product_id_seq         | sequence | postgres
+ public | students                        | table    | postgres
+ public | students_student_id_seq         | sequence | postgres
+ public | students_student_id_seq1        | sequence | postgres
+ public | transactions                    | table    | postgres
+ public | transactions_transaction_id_seq | sequence | postgres
+ public | university_students             | table    | postgres
+(13 rows)
+
+postgres=# SELECT * FROM customers;
+ customer_id | customer_name |      email      
+-------------+---------------+-----------------
+        1000 | VIP Customer  | vip@example.com
+(1 row)
+
+postgres=# \d
+                       List of relations
+ Schema |              Name               |   Type   |  Owner   
+--------+---------------------------------+----------+----------
+ public | course_enrollments              | table    | postgres
+ public | customers                       | table    | postgres
+ public | customers_customer_id_seq       | sequence | postgres
+ public | orders                          | table    | postgres
+ public | orders_order_id_seq             | sequence | postgres
+ public | products                        | table    | postgres
+ public | products_product_id_seq         | sequence | postgres
+ public | students                        | table    | postgres
+ public | students_student_id_seq         | sequence | postgres
+ public | students_student_id_seq1        | sequence | postgres
+ public | transactions                    | table    | postgres
+ public | transactions_transaction_id_seq | sequence | postgres
+ public | university_students             | table    | postgres
+(13 rows)
+
+postgres=# DROP TABLE course enrollments;
+ERROR:  syntax error at or near "enrollments"
+LINE 1: DROP TABLE course enrollments;
+                          ^
+postgres=# DROP TABLE course_enrollments;
+DROP TABLE
+postgres=# DROP TABLE customers;
+DROP TABLE
+postgres=# DROP TABLE products;
+DROP TABLE
+postgres=# DROP TABLE students;
+DROP TABLE
+postgres=# DROP TABLE transactions;
+DROP TABLE
+postgres=# exit
+➜  Database Course git:(main) ✗ 
+
