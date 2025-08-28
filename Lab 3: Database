@@ -1,0 +1,62 @@
+➜  ~ psql -h localhost -p 5432 -U postgres -d postgres
+Password for user postgres: 
+psql (14.18 (Ubuntu 14.18-0ubuntu0.22.04.1))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+postgres=# \l
+                                  List of databases
+   Name    |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges   
+-----------+----------+----------+-------------+-------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ template0 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+(3 rows)
+
+postgres=# \d
+               List of relations
+ Schema |      Name       |   Type   |  Owner   
+--------+-----------------+----------+----------
+ public | students        | table    | postgres
+ public | students_id_seq | sequence | postgres
+(2 rows)
+
+postgres=# \dt
+          List of relations
+ Schema |   Name   | Type  |  Owner   
+--------+----------+-------+----------
+ public | students | table | postgres
+(1 row)
+
+postgres=# CREATE DATABASE database_name;
+CREATE DATABASE
+postgres=# CREATE DATABASE university;
+CREATE DATABASE
+postgres=# DROP DATABASE database_name;
+DROP DATABASE
+postgres=# DROP DATABASE university;
+DROP DATABASE
+postgres=# CREATE DATABASE university;
+CREATE DATABASE
+postgres=# CREATE DATABASE database_name;
+CREATE DATABASE
+postgres=# \l
+                                    List of databases
+     Name      |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges   
+---------------+----------+----------+-------------+-------------+-----------------------
+ database_name | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ postgres      | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ template0     | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+               |          |          |             |             | postgres=CTc/postgres
+ template1     | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+               |          |          |             |             | postgres=CTc/postgres
+ university    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+(5 rows)
+
+postgres=# \c database_name
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+You are now connected to database "database_name" as user "postgres".
+database_name=# 
+

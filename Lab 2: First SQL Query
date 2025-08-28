@@ -1,0 +1,57 @@
+➜  ~ psql -h localhost -p 5432 -U postgres -d postgres
+Password for user postgres: 
+psql (14.18 (Ubuntu 14.18-0ubuntu0.22.04.1))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+postgres=# CREATE TABLE students (
+postgres(# id SERIAL PRIMARY KEY,
+postgres(# name VARCHAR(100),
+postgres(# email VARCHAR(100),
+postgres(# faculty VARCHAR(100)
+postgres(# );
+CREATE TABLE
+postgres=# INSERT INTO students (name, email, faculty) VALUES ('Kumar', 'kumar@example.com', 'SFW');
+INSERT 0 1
+postgres=# SELECT name, email FROM students WHERE faculty = 'SFW';
+ name  |       email       
+-------+-------------------
+ Kumar | kumar@example.com
+(1 row)
+
+postgres=# SELECT name FROM students WHERE name = 'Kumar';
+ name  
+-------
+ Kumar
+(1 row)
+
+postgres=# SELECT name, email, faculty FROM students WHERE name = 'Kumar';
+ name  |       email       | faculty 
+-------+-------------------+---------
+ Kumar | kumar@example.com | SFW
+(1 row)
+
+postgres=# INSERT INTO students (name, email, faculty) VALUES ('student_2', 'student_2@example.com', 'AMI');
+INSERT 0 1
+postgres=# SELECT * FROM students;
+ id |   name    |         email         | faculty 
+----+-----------+-----------------------+---------
+  1 | Kumar     | kumar@example.com     | SFW
+  2 | student_2 | student_2@example.com | AMI
+(2 rows)
+
+postgres=# SELECT name, email FROM students LIMIT 2;
+   name    |         email         
+-----------+-----------------------
+ Kumar     | kumar@example.com
+ student_2 | student_2@example.com
+(2 rows)
+
+postgres=# SELECT name, email FROM students LIMIT 1;
+ name  |       email       
+-------+-------------------
+ Kumar | kumar@example.com
+(1 row)
+
+postgres=# 
+
