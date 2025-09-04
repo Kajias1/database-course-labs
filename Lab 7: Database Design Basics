@@ -1,0 +1,232 @@
+postgres=# \dt
+                List of relations
+ Schema |        Name         | Type  |  Owner   
+--------+---------------------+-------+----------
+ public | courses             | table | postgres
+ public | departments         | table | postgres
+ public | employees           | table | postgres
+ public | student_enrollments | table | postgres
+ public | students            | table | postgres
+(5 rows)
+
+postgres=# DROP TABLE courses;
+ERROR:  cannot drop table courses because other objects depend on it
+DETAIL:  constraint student_enrollments_course_id_fkey on table student_enrollments depends on table courses
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.
+postgres=# DROP TABLE courses CASCADE;
+NOTICE:  drop cascades to constraint student_enrollments_course_id_fkey on table student_enrollments
+DROP TABLE
+postgres=# DROP TABLE departmenst CASCADE;
+ERROR:  table "departmenst" does not exist
+postgres=# DROP TABLE departments CASCADE;
+NOTICE:  drop cascades to constraint employees_dept_id_fkey on table employees
+DROP TABLE
+postgres=# DROP TABLE employees CASCADE;
+DROP TABLE
+postgres=# DROP TABLE stundet_enrollments CASCADE;
+ERROR:  table "stundet_enrollments" does not exist
+postgres=# DROP TABLE student_enrollments CASCADE;
+DROP TABLE
+postgres=# DROP TABLE stundets CASCADE;
+ERROR:  table "stundets" does not exist
+postgres=# \dt
+          List of relations
+ Schema |   Name   | Type  |  Owner   
+--------+----------+-------+----------
+ public | students | table | postgres
+(1 row)
+
+postgres=# DROP TABLE studen\ts CASCADE;
+invalid command \ts
+Try \? for help.
+postgres-# DROP TABLE students CASCADE;
+ERROR:  syntax error at or near "DROP"
+LINE 2: DROP TABLE students CASCADE;
+        ^
+postgres=# CREATE TABLE students (
+postgres(# student_id INT PRIMARY KEY,
+postgres(# name VARCHAR(100)
+postgres(# );
+ERROR:  relation "students" already exists
+postgres=# DROP TABLE students;
+DROP TABLE
+postgres=# CREATE TABLE students (
+student_id INT PRIMARY KEY,
+name VARCHAR(100)
+);
+CREATE TABLE
+postgres=# CREATE TABLE student_phones (
+postgres(# student_id INT,
+postgres(# phone_number VARCHAR(15),
+postgres(# phone_type VARCHAR(20),
+postgres(# PRIMARY KEY (student_id, phone_number),
+postgres(# PRIMARY KEY (student_id) REFERENCES students(student_id)
+postgres(# );
+ERROR:  syntax error at or near "REFERENCES"
+LINE 6: PRIMARY KEY (student_id) REFERENCES students(student_id)
+                                 ^
+postgres=# CREATE TABLE student_phones (
+student_id INT,
+phone_number VARCHAR(15),
+phone_type VARCHAR(20),
+PRIMARY KEY (student_id, phone_number),
+FOREIGN KEY (student_id) REFERENCES students(student_id)
+);
+CREATE TABLE
+postgres=# CREATE TABLE courses (
+postgres(# course_id INT PRIMARY KEY,
+postgres(# course_name VARCHAR(100),
+postgres(# credits INT
+postgres(# );
+CREATE TABLE
+postgres=# CREATE TABLE enrollments (
+postgres(# student_id INT,
+postgres(# course_id INT,
+postgres(# grade CHAR(2),
+postgres(# PRIMARY KEY (student_id, course_id),
+postgres(# FOREIGN KEY (student_id) REFERENCES students(students_id),
+postgres(# FOREIGN KEY (course_id) REFERENCES courses(course_id)
+postgres(# );
+ERROR:  column "students_id" referenced in foreign key constraint does not exist
+postgres=# CREATE TABLE enrollments (
+student_id INT,
+course_id INT,
+grade CHAR(2),
+PRIMARY KEY (student_id, course_id),
+FOREIGN KEY (student_id) REFERENCES students(student_id),
+FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+CREATE TABLE
+postgres=# \dt
+             List of relations
+ Schema |      Name      | Type  |  Owner   
+--------+----------------+-------+----------
+ public | courses        | table | postgres
+ public | enrollments    | table | postgres
+ public | student_phones | table | postgres
+ public | students       | table | postgres
+(4 rows)
+
+postgres=# DROP TABLE courses;
+ERROR:  cannot drop table courses because other objects depend on it
+DETAIL:  constraint enrollments_course_id_fkey on table enrollments depends on table courses
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.
+postgres=# DROP TABLE courses CASCADE;
+NOTICE:  drop cascades to constraint enrollments_course_id_fkey on table enrollments
+DROP TABLE
+postgres=# DROP TABLE enrollments;
+DROP TABLE
+postgres=# DROP TABLE student_phones CASCADE;
+DROP TABLE
+postgres=# DROP TABLE students;
+DROP TABLE
+postgres=# \dt
+Did not find any relations.
+postgres=# CREATE TABLE departments (
+postgres(# department_id INT PRIMARY KEY,
+postgres(# department_name VARCHAR(100),
+postgres(# department_head VARCHAR(100)
+postgres(# );
+CREATE TABLE
+postgres=# CREATE TABLE students (
+postgres(# student_id INT PRIMARY KEY,
+postgres(# name VARCHAR(100),
+postgres(# department_id INT,
+postgres(# FOREIGN KEY (department_id) REFERENCES departments(departments_id)
+postgres(# );
+ERROR:  column "departments_id" referenced in foreign key constraint does not exist
+postgres=# CREATE TABLE students (
+student_id INT PRIMARY KEY,
+name VARCHAR(100),
+department_id INT,
+FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);
+CREATE TABLE
+postgres=# \dt
+            List of relations
+ Schema |    Name     | Type  |  Owner   
+--------+-------------+-------+----------
+ public | departments | table | postgres
+ public | students    | table | postgres
+(2 rows)
+
+postgres=# DROP TABLE departments;
+ERROR:  cannot drop table departments because other objects depend on it
+DETAIL:  constraint students_department_id_fkey on table students depends on table departments
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.
+postgres=# DROP TABLE departments CASCADE;
+NOTICE:  drop cascades to constraint students_department_id_fkey on table students
+DROP TABLE
+postgres=# DROP TABLE students;
+DROP TABLE
+postgres=# \dt
+Did not find any relations.
+postgres=# CREATE TABLE authors (
+postgres(# author_id SERIAL PRIMARY KEY,
+postgres(# first_name VARCHAR(50) NOT NULL,
+postgres(# last_name VARCHAR(50) NOT NULL,
+postgres(# birth_date DATE
+postgres(# );
+CREATE TABLE
+postgres=# CREATE TABLE books )
+postgres-# ^C
+postgres=# CREATE TABLE books (
+postgres(# book_id SERIAL PRIMARY KEY,
+postgres(# title VARCHAR(200) NOT NULL,
+postgres(# isbn VARCHAR(13) UNIQUE,
+postgres(# publication year INTEGER,
+postgres(# available_copies INTEGER DEFAULT 1
+postgres(# );
+ERROR:  syntax error at or near "INTEGER"
+LINE 5: publication year INTEGER,
+                         ^
+postgres=# CREATE TABLE books (
+book_id SERIAL PRIMARY KEY,
+title VARCHAR(200) NOT NULL,
+isbn VARCHAR(13) UNIQUE,
+publication_year INTEGER,
+available_copies INTEGER DEFAULT 1
+);
+CREATE TABLE
+postgres=# CREATE TABLE book_authors (
+postgres(# book_id INTEGER,
+postgres(# author_id INTEGER,
+postgres(# PRIMARY KEY (book_id, author_id),
+postgres(# FOREIGN KEY (book_id) REFERENCES books(book_id),
+postgres(# FOREIGN KEY (author_id) REFERENCES authors(author_id)
+postgres(# );
+CREATE TABLE
+postgres=# CREATE TABLE members (
+postgres(# member_id SERIAL PRIMARY KEY,
+postgres(# first_name VARCHAR(50) NOT NULL,
+postgres(# last_name VHARCHAR(50) NOT NULL,
+postgres(# email VARCHAR(100) UNIQUE NOT NULL,
+postgres(# phone VARCHAR(15),
+postgres(# membership_date DATE DEFAULT CURRENT_DATE
+postgres(# );
+ERROR:  type "vharchar" does not exist
+LINE 4: last_name VHARCHAR(50) NOT NULL,
+                  ^
+postgres=# CREATE TABLE members (
+member_id SERIAL PRIMARY KEY,
+first_name VARCHAR(50) NOT NULL,
+last_name VARCHAR(50) NOT NULL,
+email VARCHAR(100) UNIQUE NOT NULL,
+phone VARCHAR(15),
+membership_date DATE DEFAULT CURRENT_DATE
+);
+CREATE TABLE
+postgres=# CREATE TABLE loans (
+postgres(# load_id SERIAL PRIMARY KEY,
+postgres(# member_id INTEGER NOT NULL,
+postgres(# book_id INTEGER NOT NULL,
+postgres(# loan_date DATE DEFAULT CURRENT_DATE,
+postgres(# due_date DATE NOT NULL,
+postgres(# return_date DATE,
+postgres(# late_fee DECIMAL(10,2) DEFAULT 0.00,
+postgres(# FOREIGN KEY (member_id) REFERENCES members(member_id),
+postgres(# FOREIGN KEY (book_id) REFERENCES books(book_id)
+postgres(# );
+CREATE TABLE
+postgres=# 
+
