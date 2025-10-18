@@ -1,0 +1,168 @@
+postgres=# \dt
+           List of relations
+ Schema |     Name      | Type  | Owner 
+--------+---------------+-------+-------
+ public | coffee_house  | table | kumar
+ public | customers     | table | kumar
+ public | departments   | table | kumar
+ public | employees     | table | kumar
+ public | orders        | table | kumar
+ public | pivoted_sales | table | kumar
+ public | sales         | table | kumar
+ public | students      | table | kumar
+ public | warehouse_1   | table | kumar
+ public | warehouse_2   | table | kumar
+(10 rows)
+
+postgres=# SELECT first_name, last_name, salary
+FROM employees
+WHERE salary > (
+    SELECT AVG(salary)  -- This scalar subquery returns a single value
+    FROM employees
+);
+ first_name | last_name |  salary  
+------------+-----------+----------
+ Alice      | Smith     | 70000.00
+ Charlie    | Williams  | 90000.00
+ Diana      | Brown     | 85000.00
+(3 rows)
+
+postgres=# WITH regional_sales AS (
+    SELECT region_id, SUM(amount) AS total_sales
+    FROM orders
+    GROUP BY region_id
+)
+SELECT region_id, total_sales
+FROM regional_sales
+WHERE total_sales > 1000000;
+ region_id | total_sales 
+-----------+-------------
+(0 rows)
+
+postgres=# WITH RECURSIVE org_chart AS (
+    -- Anchor: Find the top-level manager (e.g., who has no manager)
+    SELECT employee_id, first_name, last_name, manager_id
+    FROM employees
+    WHERE manager_id IS NULL
+    UNION ALL
+    -- Recursive: Find everyone who reports to the people already in the chart
+    SELECT e.employee_id, e.first_name, e.last_name, e.manager_id
+    FROM employees e
+    INNER JOIN org_chart oc ON e.manager_id = oc.employee_id
+)
+SELECT * FROM org_chart;
+ employee_id | first_name | last_name | manager_id 
+-------------+------------+-----------+------------
+           1 | Alice      | Smith     |           
+           3 | Charlie    | Williams  |           
+           5 | Evan       | Jones     |           
+           2 | Bob        | Johnson   |          1
+           4 | Diana      | Brown     |          3
+           6 | Fiona      | Garcia    |          5
+           7 | George     | Miller    |          5
+(7 rows)
+
+postgres=# SELECT product_name FROM warehouse_1
+UNION
+SELECT product_name FROM warehouse_2;
+ product_name 
+--------------
+ Tablet
+ Laptop
+ Phone
+(3 rows)
+
+postgres=# SELECT product_id FROM warehouse_1 WHERE quantity = 0
+INTERSECT
+SELECT product_id FROM warehouse_2 WHERE quantity = 0;
+ product_id 
+------------
+        102
+(1 row)
+
+postgres=# SELECT
+    first_name,
+    last_name,
+    department,
+    salary,
+    RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_salary_rank
+FROM employees;
+ first_name | last_name | department |  salary  | dept_salary_rank 
+------------+-----------+------------+----------+------------------
+ Alice      | Smith     | HR         | 70000.00 |                1
+ Bob        | Johnson   | HR         | 60000.00 |                2
+ Charlie    | Williams  | IT         | 90000.00 |                1
+ Diana      | Brown     | IT         | 85000.00 |                2
+ George     | Miller    | Sales      | 65000.00 |                1
+ Fiona      | Garcia    | Sales      | 55000.00 |                2
+ Evan       | Jones     | Sales      | 50000.00 |                3
+(7 rows)
+
+postgres=# SELECT
+    product_name,
+    SUM(CASE WHEN year = 2022 THEN sales_amount ELSE 0 END) AS year_2022,
+    SUM(CASE WHEN year = 2023 THEN sales_amount ELSE 0 END) AS year_2023,
+    SUM(CASE WHEN year = 2024 THEN sales_amount ELSE 0 END) AS year_2024
+FROM sales
+GROUP BY product_name;
+Unpivoting with UNION ALL:
+ product_name | year_2022 | year_2023 | year_2024 
+--------------+-----------+-----------+-----------
+ Tablet       |    300.00 |    350.00 |    400.00
+ Phone        |    600.00 |    650.00 |    700.00
+ Laptop       |   1200.00 |   1300.00 |   1250.00
+(3 rows)
+
+postgres=# SELECT product_name, '2022' AS year, year_2022 AS sales_amount FROM pivoted_sales
+UNION ALL
+SELECT product_name, '2023' AS year, year_2023 AS sales_amount FROM pivoted_sales
+UNION ALL
+SELECT product_name, '2024' AS year, year_2024 AS sales_amount FROM pivoted_sales
+ORDER BY product_name, year;
+ product_name | year | sales_amount 
+--------------+------+--------------
+ Laptop       | 2022 |      1200.00
+ Laptop       | 2023 |      1300.00
+ Laptop       | 2024 |      1250.00
+ Phone        | 2022 |       600.00
+ Phone        | 2023 |       650.00
+ Phone        | 2024 |       700.00
+ Tablet       | 2022 |       300.00
+ Tablet       | 2023 |       350.00
+ Tablet       | 2024 |       400.00
+(9 rows)
+
+postgres=# SELECT
+    employee_id,
+    SUM(salary) OVER (PARTITION BY department) AS total_dept_salary,
+    AVG(salary) FILTER (WHERE tenure > 5) OVER () AS avg_salary_senior
+FROM employees;
+ employee_id | total_dept_salary | avg_salary_senior  
+-------------+-------------------+--------------------
+           1 |         130000.00 | 77500.000000000000
+           2 |         130000.00 | 77500.000000000000
+           3 |         175000.00 | 77500.000000000000
+           4 |         175000.00 | 77500.000000000000
+           5 |         170000.00 | 77500.000000000000
+           6 |         170000.00 | 77500.000000000000
+           7 |         170000.00 | 77500.000000000000
+(7 rows)
+
+postgres=# SELECT product_name, status
+FROM orders
+ORDER BY
+    CASE status
+        WHEN 'High Priority' THEN 1
+        WHEN 'Medium Priority' THEN 2
+        WHEN 'Low Priority' THEN 3
+        ELSE 4
+    END;
+ product_name |     status      
+--------------+-----------------
+ Laptop       | High Priority
+ Monitor      | High Priority
+ Phone        | Medium Priority
+ Keyboard     | Medium Priority
+ Tablet       | Low Priority
+ Mouse        | Low Priority
+(6 rows)
