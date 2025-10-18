@@ -1,0 +1,17 @@
+postgres=# \dt
+           List of relations
+ Schema |     Name     | Type  | Owner 
+--------+--------------+-------+-------
+ public | coffee_house | table | kumar
+(1 row)
+
+postgres=# \d coffee_house
+                    Table "public.coffee_house"
+  Column  |         Type          | Collation | Nullable | Default 
+----------+-----------------------+-----------+----------+---------
+ coffee   | integer               |           |          | 
+ merch    | integer               |           |          | 
+ store_id | integer               |           |          | 
+ total    | integer               |           |          | 
+ city     | character varying(50) |           |          | 
+
