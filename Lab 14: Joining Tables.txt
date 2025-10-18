@@ -1,0 +1,72 @@
+postgres=# CREATE TABLE customers ( customer_id SERIAL PRIMARY KEY, name VARCHAR(100), email VARCHAR(100) );
+CREATE TABLE
+postgres=# CREATE TABLE orders ( order_id SERIAL PRIMARY KEY, customer_id INTEGER REFERENCES customers(customer_id), order_date DATE, total_amount DECIMAL(10,2) );
+CREATE TABLE
+postgres=# INSERT INTO customers (name, email) VALUES
+('Alice', 'alice@example.com'),
+('Bob', 'bob@example.com'),
+('Charlie', 'charlie@example.com');
+
+INSERT INTO orders (customer_id, order_date, total_amount) VALUES
+(1, '2025-10-10', 120.50),
+(1, '2025-10-12', 80.00),
+(2, '2025-10-11', 50.00);
+INSERT 0 3
+INSERT 0 3
+postgres=# SELECT c.customer_id, c.name, o.order_id, o.total_amount
+FROM customers c
+INNER JOIN orders o
+ON c.customer_id = o.customer_id;
+ customer_id | name  | order_id | total_amount 
+-------------+-------+----------+--------------
+           1 | Alice |        1 |       120.50
+           1 | Alice |        2 |        80.00
+           2 | Bob   |        3 |        50.00
+(3 rows)
+
+postgres=# SELECT c.customer_id, c.name, o.order_id, o.total_amount
+FROM customers c
+LEFT JOIN orders o
+ON c.customer_id = o.customer_id;
+ customer_id |  name   | order_id | total_amount 
+-------------+---------+----------+--------------
+           1 | Alice   |        1 |       120.50
+           1 | Alice   |        2 |        80.00
+           2 | Bob     |        3 |        50.00
+           3 | Charlie |          |             
+(4 rows)
+
+postgres=# SELECT c.customer_id, c.name, o.order_id, o.total_amount
+FROM customers c
+RIGHT JOIN orders o
+ON c.customer_id = o.customer_id;
+ customer_id | name  | order_id | total_amount 
+-------------+-------+----------+--------------
+           1 | Alice |        1 |       120.50
+           1 | Alice |        2 |        80.00
+           2 | Bob   |        3 |        50.00
+(3 rows)
+
+postgres=# SELECT c.customer_id, c.name, o.order_id, o.total_amount
+FROM customers c
+FULL JOIN orders o
+ON c.customer_id = o.customer_id;
+ customer_id |  name   | order_id | total_amount 
+-------------+---------+----------+--------------
+           1 | Alice   |        1 |       120.50
+           1 | Alice   |        2 |        80.00
+           2 | Bob     |        3 |        50.00
+           3 | Charlie |          |             
+(4 rows)
+
+postgres=# SELECT c.name, SUM(o.total_amount) AS total_spent
+FROM customers c
+LEFT JOIN orders o
+ON c.customer_id = o.customer_id
+GROUP BY c.name;
+  name   | total_spent 
+---------+-------------
+ Alice   |      200.50
+ Bob     |       50.00
+ Charlie |            
+(3 rows)
