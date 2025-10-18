@@ -1,0 +1,105 @@
+postgres=# SELECT * FROM departments;
+ dept_id |    dept_name    | manager_name  |  budget   
+---------+-----------------+---------------+-----------
+       1 | Human Resources | Alice Johnson |  50000.00
+       2 | Engineering     | Bob Smith     | 200000.00
+       3 | Sales           | Carol Davis   | 150000.00
+(3 rows)
+
+postgres=# SELECT * FROM employees;
+ emp_id | first_name | last_name |     position      |  salary   | hire_date  | dept_id 
+--------+------------+-----------+-------------------+-----------+------------+---------
+      1 | John       | Doe       | HR Specialist     |  45000.00 | 2025-10-18 |       1
+      2 | Jane       | Smith     | Engineer          |  95000.00 | 2025-10-18 |       2
+      3 | Mike       | Brown     | Sales Associate   |  60000.00 | 2025-10-18 |       3
+      4 | Emily      | Davis     | Software Engineer | 105000.00 | 2025-10-18 |       2
+      5 | Sara       | Wilson    | HR Assistant      |  40000.00 | 2025-10-18 |       1
+(5 rows)
+
+postgres=# SELECT name, department FROM employees;
+ERROR:  column "name" does not exist
+LINE 1: SELECT name, department FROM employees;
+               ^
+postgres=# SELECT first_name, department FROM employees;
+ERROR:  column "department" does not exist
+LINE 1: SELECT first_name, department FROM employees;
+                           ^
+postgres=# SELECT first_name, department FROM employees;
+ERROR:  column "department" does not exist
+LINE 1: SELECT first_name, department FROM employees;
+                           ^
+postgres=# SELECT first_name, dept_id FROM employees;
+ first_name | dept_id 
+------------+---------
+ John       |       1
+ Jane       |       2
+ Mike       |       3
+ Emily      |       2
+ Sara       |       1
+(5 rows)
+
+postgres=# exit
+shirin@MacBook-Air--Shik database-course-labs % clear
+
+shirin@MacBook-Air--Shik database-course-labs % psql
+psql (14.19 (Homebrew))
+Type "help" for help.
+
+postgres=# \dt
+           List of relations
+ Schema |     Name     | Type  | Owner 
+--------+--------------+-------+-------
+ public | coffee_house | table | kumar
+ public | departments  | table | kumar
+ public | employees    | table | kumar
+ public | students     | table | kumar
+(4 rows)
+
+postgres=# SELECT first_name, dept_id FROM employees;
+ first_name | dept_id 
+------------+---------
+ John       |       1
+ Jane       |       2
+ Mike       |       3
+ Emily      |       2
+ Sara       |       1
+(5 rows)
+
+postgres=# SELECT first_name, salary, salary * 0.10 AS potential_bonus FROM employees;
+ first_name |  salary   | potential_bonus 
+------------+-----------+-----------------
+ John       |  45000.00 |       4500.0000
+ Jane       |  95000.00 |       9500.0000
+ Mike       |  60000.00 |       6000.0000
+ Emily      | 105000.00 |      10500.0000
+ Sara       |  40000.00 |       4000.0000
+(5 rows)
+
+postgres=# SELECT first_name, salary FROM employees WHERE salary > 75000 AND dept_id = 2;
+ first_name |  salary   
+------------+-----------
+ Jane       |  95000.00
+ Emily      | 105000.00
+(2 rows)
+
+postgres=# SELECT first_name
+postgres-# FROM employees
+postgres-# WHERE dept_id IN (1, 2);
+ first_name 
+------------
+ John
+ Jane
+ Emily
+ Sara
+(4 rows)
+
+postgres=# SELECT first_name, last_name, dept_id                                         
+FROM employees
+WHERE dept_id IN (1, 2);
+ first_name | last_name | dept_id 
+------------+-----------+---------
+ John       | Doe       |       1
+ Jane       | Smith     |       2
+ Emily      | Davis     |       2
+ Sara       | Wilson    |       1
+(4 rows)
