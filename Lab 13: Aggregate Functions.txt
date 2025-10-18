@@ -1,0 +1,62 @@
+postgres=# CREATE TABLE sales (
+    id SERIAL PRIMARY KEY,
+    product VARCHAR(50),
+    quantity INT,
+    price NUMERIC(10,2),
+    sale_date DATE
+);
+CREATE TABLE
+postgres=# INSERT INTO sales (product, quantity, price, sale_date) VALUES
+('Laptop', 2, 1200.00, '2025-10-01'),
+('Phone', 5, 600.00, '2025-10-02'),
+('Laptop', 1, 1200.00, '2025-10-03'),
+('Headphones', 10, 50.00, '2025-10-03'),
+('Phone', 3, 600.00, '2025-10-04');
+INSERT 0 5
+postgres=# SELECT COUNT(*) AS total_sales FROM sales;
+ total_sales 
+-------------
+           5
+(1 row)
+
+postgres=# SELECT SUM(quantity) AS total_quantity FROM sales;
+ total_quantity 
+----------------
+             21
+(1 row)
+
+postgres=# SELECT AVG(price) AS avg_price FROM sales;
+      avg_price       
+----------------------
+ 730.0000000000000000
+(1 row)
+
+postgres=# SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM sales;
+ min_price | max_price 
+-----------+-----------
+     50.00 |   1200.00
+(1 row)
+
+postgres=# SELECT product,
+       SUM(quantity) AS total_quantity,
+       AVG(price) AS avg_price
+FROM sales
+GROUP BY product;
+  product   | total_quantity |       avg_price       
+------------+----------------+-----------------------
+ Phone      |              8 |  600.0000000000000000
+ Laptop     |              3 | 1200.0000000000000000
+ Headphones |             10 |   50.0000000000000000
+(3 rows)
+
+postgres=# SELECT product,
+       SUM(quantity) AS total_quantity
+FROM sales
+GROUP BY product
+ORDER BY total_quantity DESC;
+  product   | total_quantity 
+------------+----------------
+ Headphones |             10
+ Phone      |              8
+ Laptop     |              3
+(3 rows)
